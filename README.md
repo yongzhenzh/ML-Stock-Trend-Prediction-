@@ -1,111 +1,113 @@
-Stock Trend Prediction Using LSTM and SVM Hybrid Model
-Author: Yongzhen “Michael” Zhang
-Date: April 21, 2025
+# Stock Trend Prediction Using LSTM and SVM Hybrid Model
 
-Overview
-This project implements a hybrid machine learning model that combines a Long Short-Term Memory (LSTM) neural network with a Support Vector Machine (SVM) classifier to predict stock price trends for Apple Inc. (AAPL). It leverages historical stock data and technical indicators to first forecast future prices using LSTM, then classifies the predicted trend direction using SVM.
+**Author:** ***Yongzhen “Michael” Zhang***  
+**Date:** ***April 21, 2025***
 
-Technologies Used
-Python
+## Overview
 
-yfinance
+This project implements a hybrid machine learning model that combines a ***Long Short-Term Memory (LSTM)*** neural network with a ***Support Vector Machine (SVM)*** classifier to predict stock price trends for ***Apple Inc. (AAPL)***. It leverages historical stock data and technical indicators to first forecast future prices using LSTM, then classifies the predicted trend direction using SVM.
 
-NumPy, Pandas
+## Technologies Used
 
-TensorFlow (Keras)
+- ***Python***
+- ***yfinance***
+- ***NumPy, Pandas***
+- ***TensorFlow (Keras)***
+- ***Scikit-learn***
+- ***Matplotlib***
 
-Scikit-learn
+## Methods and Workflow
 
-Matplotlib
+### 1. Data Collection and Preprocessing
 
-Methods and Workflow
-1. Data Collection and Preprocessing
-Collected daily historical stock data for AAPL (2020–2024) using the yfinance API.
+- Collected daily historical stock data for ***AAPL (2020–2024)*** using the ***`yfinance`*** API.
+- Cleaned the dataset by removing missing and duplicate values.
+- Engineered technical indicators:
+  - ***Relative Strength Index (RSI)***
+  - ***10-day Moving Average (MA_10)***
+- One-hot encoded ***day-of-week*** features.
+- Applied ***MinMaxScaler*** normalization to all numeric inputs.
 
-Cleaned the dataset by removing missing and duplicate values.
+### 2. Sequence Preparation
 
-Engineered technical indicators:
+- Used a ***60-day rolling window*** to generate input sequences.
+- Each sample contains ***60 timesteps of 12 features***.
+- Target output: the ***next day’s normalized closing price***.
+- Binary ***trend labels (1 = up, 0 = down)*** were derived from predicted prices.
 
-Relative Strength Index (RSI)
+### 3. LSTM Model
 
-10-day Moving Average (MA_10)
+***Architecture:***
+- ***Bidirectional LSTM (64 units)*** with `return_sequences=True`
+- ***Bidirectional LSTM (32 units)***
+- ***Dropout layers (0.3 and 0.2)***
+- ***Dense (32, activation=tanh) → Dense (1, activation=linear)***
 
-One-hot encoded day-of-week features.
+***Training:***
+- ***Loss:*** Mean Squared Error (**MSE**)
+- ***Optimizer:*** Adam
 
-Applied MinMaxScaler normalization to all numeric inputs.
+### 4. SVM Trend Classifier
 
-2. Sequence Preparation
-Used a 60-day rolling window to generate input sequences.
+- Trend labels derived from ***LSTM output***.
+- ***SVM with RBF kernel*** and ***class weight balancing***.
+- Trained on ***80%*** of data, tested on the remaining ***20%***.
 
-Each sample contains 60 timesteps of 12 features.
+## Results
 
-Target output: the next day’s normalized closing price.
+### LSTM Regression Performance
 
-Binary trend labels (1 = up, 0 = down) were derived from predicted prices.
+- ***MSE:*** 0.00375
+- ***RMSE:*** 0.0613
 
-3. LSTM Model
-Architecture:
+### SVM Classification Performance
 
-Bidirectional LSTM (64 units) with return_sequences=True
-
-Bidirectional LSTM (32 units)
-
-Dropout layers (0.3 and 0.2)
-
-Dense (32, activation=tanh) → Dense (1, activation=linear)
-
-Loss: Mean Squared Error (MSE)
-
-Optimizer: Adam
-
-4. SVM Trend Classifier
-Trend labels derived from LSTM output.
-
-SVM with RBF kernel and class weight balancing.
-
-Trained on 80% of data, tested on the remaining 20%.
-
-Results
-LSTM Regression Performance
-
-MSE: 0.00375
-
-RMSE: 0.0613
-
-SVM Classification Performance
-
-Accuracy: 76%
-
-F1-score:
-
-Up trend: 0.78
-
-Down trend: 0.73
+- ***Accuracy:*** 76%
+- ***F1-score:***
+  - ***Up trend:*** 0.78
+  - ***Down trend:*** 0.73
 
 The LSTM effectively captured price behavior, while the SVM reliably classified directional trends.
 
-Limitations and Future Work
-A real-time prediction pipeline was not implemented due to time constraints.
+## Source Code
 
-Hyperparameter tuning was not performed (e.g., grid search or walk-forward validation).
+The full implementation is contained in `stock_trend_predictor.py`, which defines and executes the hybrid LSTM-SVM prediction pipeline.
 
-Potential improvements include:
+### Main Steps:
 
-Adding indicators such as MACD or Bollinger Bands
+**1. Data Acquisition and Preprocessing**
+- Fetches historical stock data using `yfinance`.
+- Computes technical indicators including the 10-day Moving Average (MA_10) and Relative Strength Index (RSI).
+- One-hot encodes weekday features.
+- Normalizes features using `MinMaxScaler`.
 
-Trying alternative classifiers like XGBoost or Random Forest
+**2. Sequence Preparation**
+- Converts the data into sequences of 60 time steps with 12 input features each.
+- The target is the normalized closing price of the next day.
 
-Testing with live data and walk-forward validation
+**3. LSTM Model**
+- A 3-layer Bidirectional LSTM with dropout is used to model time dependencies.
+- The architecture includes:
+  - `LSTM(64, return_sequences=True)`
+  - `LSTM(32, return_sequences=True)`
+  - `LSTM(16, return_sequences=False)`
+- Followed by dense layers:
+  - `Dense(32, activation='tanh')`
+  - `Dense(1, activation='linear')`
+- Compiled with `Adam` optimizer and `MSE` loss.
 
-References
-Hochreiter, S., & Schmidhuber, J. (1997). Long Short-Term Memory. Neural Computation, 9(8), 1735–1780.
+**4. SVM Classifier**
+- Uses the predicted LSTM outputs to generate trend labels (1 = up, 0 = down).
+- Trains an `SVC` classifier with RBF kernel and balanced class weights.
 
-Cortes, C., & Vapnik, V. (1995). Support-vector networks. Machine Learning, 20(3), 273–297.
+**5. Evaluation**
+- The LSTM model is evaluated using Mean Squared Error (MSE) and Root Mean Squared Error (RMSE).
+- The SVM is evaluated using classification accuracy and F1-scores.
 
-Brownlee, J. (2017). Introduction to Time Series Forecasting with Python. Machine Learning Mastery.
+**6. Visualization**
+- Plots the actual vs. predicted closing prices over the test set.
 
-Patel, J., Shah, S., Thakkar, P., & Kotecha, K. (2015). Predicting stock and stock price index movement using trend deterministic data preparation and machine learning techniques. Expert Systems with Applications, 42(1), 259-268.
+To run the full pipeline, execute the following in terminal:
 
-Summary
-This project demonstrates the value of hybrid modeling in time-series forecasting. LSTM was used to capture long-term dependencies in stock price behavior, and SVM translated the regression outputs into clear directional signals. The combined system achieved both numerical accuracy and robust trend classification, showing strong potential for real-world financial applications.
-
+```bash
+python stock_trend_predictor.py
