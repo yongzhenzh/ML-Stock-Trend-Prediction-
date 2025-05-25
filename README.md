@@ -107,7 +107,3 @@ The full implementation is contained in `stock_trend_predictor.py`, which define
 **6. Visualization**
 - Plots the actual vs. predicted closing prices over the test set.
 
-To run the full pipeline, execute the following in terminal:
-
-```bash
-python stock_trend_predictor.py
